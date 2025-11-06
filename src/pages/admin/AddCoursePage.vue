@@ -95,25 +95,27 @@ const onFileChange = (event) => {
 }
 
 // ফর্ম সাবমিট করার ফাংশন
+// AddCoursePage.vue - <script setup> এর ভেতরের অংশ
+
+// ... অন্যান্য কোড ...
+
 const submitCourse = async () => {
   isSubmitting.value = true
-  // ফাইল আপলোডের জন্য FormData ব্যবহার করতে হয়
-  const formData = new FormData()
-  formData.append('title', course.title)
-  formData.append('description', course.description)
-  formData.append('price', course.price)
-  formData.append('duration', course.duration)
-  formData.append('level', course.level)
-  formData.append('image', course.image)
-
   try {
-    // অ্যাডমিন কোর্স তৈরির জন্য API কল
-    await apiClient.post('/admin/courses', formData)
-    // সফল হলে কোর্স ম্যানেজ পেজে রিডাইরেক্ট করুন
-    router.push('/admin/courses')
+    const formData = new FormData()
+    formData.append('title', course.value.title)
+    formData.append('description', course.value.description)
+    formData.append('price', course.value.price)
+    formData.append('duration', course.value.duration)
+    formData.append('level', course.value.level)
+    formData.append('image', course.value.image)
+
+    // এখান অ্যাডমিন এন্ডপয়েন্টে পাঠানো হচ্ছে
+    await apiClient.post('/admin/courses', formData) 
+    
+    router.push('/admin/courses');
   } catch (error) {
-    console.error('Error creating course:', error)
-    alert('Failed to create course. Please check the console.')
+    console.error('Error creating course:', error.response?.data || error);
   } finally {
     isSubmitting.value = false
   }
