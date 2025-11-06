@@ -8,6 +8,8 @@ import LoginPage from '@/pages/LoginPage.vue'
 import RegisterPage from '../pages/RegisterPage.vue'
 import DashboardPage from '../pages/DashboardPage.vue'
 import AddCoursePage from '../pages/AddCoursePage.vue';
+import EnrollmentPage from '../pages/EnrollmentPage.vue';
+import PaymentPage from '../pages/PaymentPage.vue';
 const routes = [
   { path: '/', name: 'Home', component: HomePage },
   { path: '/about', name: 'About', component: AboutPage },
@@ -21,6 +23,16 @@ const routes = [
     path: '/courses/create',
     name: 'add-course',
     component: AddCoursePage
+  },
+  {
+    path: '/enrollment',
+    name: 'Enrollment',
+    component: EnrollmentPage
+  },
+  {
+    path: '/payment/:id',
+    name: 'Payment',
+    component: PaymentPage
   }
 ]
 

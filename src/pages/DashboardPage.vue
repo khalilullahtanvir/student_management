@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import axios from "@/api";
+import DataService from "../services/DataService.js";
 
 export default {
   name: "DashboardPage",
@@ -34,25 +34,10 @@ export default {
   },
   async mounted() {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        this.$router.push("/login");
-        return;
-      }
-
-      const response = await axios.get("/api/user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      this.user = response.data;
-      console.log("✅ User data:", this.user);
+      this.user = JSON.parse(sessionStorage.getItem("student"));
+      console.log(this.user);
     } catch (err) {
-      console.error("❌ User fetch failed:", err.response?.data || err);
-      this.error = "Failed to load user info. Please log in again.";
-      localStorage.removeItem("token");
-      this.$router.push("/login");
+      this.error = "Failed to load student info. Please log in again.";
     }
   },
 };

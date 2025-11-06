@@ -23,8 +23,8 @@
 </template>
 
 <script>
-import axios from "@/api";
-
+import DataService from "../services/DataService.js";
+import router from "../router/index.js";
 export default {
   name: "LoginPage",
   data() {
@@ -33,28 +33,24 @@ export default {
       error: "",
     };
   },
-// LoginPage.vue - এর একটি অংশ
-methods: {
-    async login() {
-        try {
-            const response = await axios.post('http://127.0.0.1:8000/api/login', {
-                email: this.email,
-                password: this.password
+  // LoginPage.vue - এর একটি অংশ
+  methods: {
+    loginUser() {
+            DataService.login(this.form)
+            .then(response => {
+              //console.log(response);
+              if(response.data.token){
+                sessionStorage.setItem('uid', response.data.token);
+                sessionStorage.setItem('student', JSON.stringify(response.data.student));
+              }else
+                alert(response.data.error)
+                router.push({ name: 'Dashboard' });
+                window.location.href='/dashboard';
+            })
+            .catch(e => {
+              console.log(e);
             });
-
-            // সার্ভার থেকে টোকেনটি রিসিভ করুন
-            const token = response.data.token;
-
-            // টোকেনটি localStorage এ সেভ করে রাখুন
-            localStorage.setItem('auth_token', token);
-
-            // লগইন হয়ে গেলে কোর্স পেজে নিয়ে যান
-            this.$router.push('/courses');
-
-        } catch (error) {
-            console.error('Login failed:', error.response.data);
-        }
-    }
-}
+          }
+  }
 };
 </script>

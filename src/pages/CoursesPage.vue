@@ -18,10 +18,11 @@
   </div>
 </template>
 
-<script>
-import axios from "@/api"; // আমাদের কাস্টম apiClient ইম্পোর্ট করছে
+  <script>
+  import DataService from "../services/DataService.js";
 
 export default {
+  name: "CoursesPage",
   data() {
     return {
       courses: [],
@@ -30,9 +31,8 @@ export default {
   },
   async mounted() {
     try {
-      // সমাধান: শুধু '/courses' লিখুন, baseURL স্বয়ংক্রিয়ভাবে যুক্ত হবে
-      const res = await axios.get("/courses"); 
-      this.courses = res.data;
+      const res = await DataService.getCourses(); 
+      this.courses = res.data.data;
     } catch (error) {
       console.error("Error fetching courses:", error);
       // যদি 401 এরর আসে, ইন্টারসেপ্টর আপনাকে লগইন পেজে নিয়ে যাবে
@@ -43,10 +43,7 @@ export default {
       try {
         // সমাধান: শুধু '/enrollments' লিখুন এবং টোকেন হ্যান্ডলিং মুছে দিন
         // ইন্টারসেপ্টর স্বয়ংক্রিয়ভাবে টোকেন যুক্ত করবে
-        const res = await axios.post("/enrollments", {
-          course_id: courseId,
-        });
-
+        const res = await DataService.enroll(courseId);
         this.message = res.data.message;
       } catch (err) {
         console.error("Enrollment error:", err);

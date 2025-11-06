@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import axios from "@/api";
+import DataService from "../services/DataService.js";
 
 export default {
   name: "RegisterPage",
@@ -55,11 +55,16 @@ export default {
       this.error = "";
       this.success = "";
       try {
-        await axios.get("/sanctum/csrf-cookie");
-        const response = await axios.post("/api/register", this.form);
+        const response = await DataService.register(this.form);
         this.success = "Registration successful!";
-        console.log("✅ Register success:", response.data);
+        if(response.data.token){
+          sessionStorage.setItem('uid', response.data.token);
+          sessionStorage.setItem('student', JSON.stringify(response.data.student));
+        }else{
+          alert(response.data.message)
+        }
         this.$router.push("/login");
+        window.location.href='/login';
       } catch (err) {
         console.error("❌ Register error:", err.response?.data || err);
         this.error = err.response?.data?.message || "Registration failed!";

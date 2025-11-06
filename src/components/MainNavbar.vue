@@ -52,6 +52,9 @@
                 <router-link to="/dashboard" class="nav-link">Dashboard</router-link>
               </li>
               <li class="nav-item">
+                <router-link to="/enrollment" class="nav-link">Enrollment</router-link>
+              </li>
+              <li class="nav-item">
                 <button class="btn btn-outline-primary ms-3" @click="logout">Logout</button>
               </li>
             </template>
@@ -85,21 +88,22 @@ export default {
   methods: {
     checkLoginStatus() {
       // localStorage এ 'token' key আছে কিনা চেক করছে
-      this.isLoggedIn = !!localStorage.getItem("token");
+      this.isLoggedIn = !!sessionStorage.getItem("uid");
     },
     async logout() {
       try {
         // baseURL থাকায় শুধু '/logout' লিখলেই হবে
         // টোকেন হেডারও স্বয়ংক্রিয়ভাবে যুক্ত হবে যদি @/api ফাইলে সেট করা থাকে
         await axios.post("/logout");
-        
-        localStorage.removeItem("token");
+        sessionStorage.removeItem("student");
+        sessionStorage.removeItem("uid");
         this.isLoggedIn = false;
         this.$router.push("/login");
       } catch (err) {
         console.error("Logout failed:", err.response?.data || err);
         // সার্ভারে সমস্যা থাকলেও লোকাল থেকে লগআউট করে দিন
-        localStorage.removeItem("token");
+        sessionStorage.removeItem("student");
+        sessionStorage.removeItem("uid");
         this.isLoggedIn = false;
         this.$router.push("/login");
       }
