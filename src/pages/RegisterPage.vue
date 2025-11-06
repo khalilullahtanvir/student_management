@@ -1,12 +1,12 @@
 <template>
   <div class="container mt-5">
     <div class="card col-md-6 offset-md-3 p-4 shadow">
-      <h2 class="text-center mb-4">Register</h2>
+      <h2 class="text-center mb-4">Create an Account</h2>
 
       <form @submit.prevent="registerUser">
         <div class="mb-3">
           <label>Name</label>
-          <input v-model="form.name" class="form-control" required />
+          <input v-model="form.name" type="text" class="form-control" required />
         </div>
 
         <div class="mb-3">
@@ -21,10 +21,17 @@
 
         <div class="mb-3">
           <label>Confirm Password</label>
-          <input v-model="form.password_confirmation" type="password" class="form-control" required />
+          <input
+            v-model="form.password_confirmation"
+            type="password"
+            class="form-control"
+            required
+          />
         </div>
 
-        <button class="btn btn-success w-100">Register</button>
+        <button class="btn btn-success w-100" :disabled="loading">
+          {{ loading ? "Registering..." : "Register" }}
+        </button>
       </form>
 
       <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
@@ -34,7 +41,7 @@
 </template>
 
 <script>
-import axios from "@/api";
+import axios from "axios";
 
 export default {
   name: "RegisterPage",
@@ -48,23 +55,56 @@ export default {
       },
       error: "",
       success: "",
+      loading: false,
     };
   },
   methods: {
     async registerUser() {
       this.error = "";
       this.success = "";
+      this.loading = true;
+
       try {
-        await axios.get("/sanctum/csrf-cookie");
-        const response = await axios.post("/api/register", this.form);
+        // ✅ Sanctum cookie first
+        await axios.get("http://127.0.0.1:8000/sanctum/csrf-cookie", {
+          withCredentials: true,
+        });
+
+        // ✅ Send registration data
+        const res = await axios.post(
+          "http://127.0.0.1:8000/api/register",
+          this.form,
+          { withCredentials: true }
+        );
+
+        const token = res.data.token;
+        localStorage.setItem("auth_token", token);
+
         this.success = "Registration successful!";
-        console.log("✅ Register success:", response.data);
-        this.$router.push("/login");
+        this.form = { name: "", email: "", password: "", password_confirmation: "" };
+
+        // ✅ redirect after registration
+        setTimeout(() => {
+          this.$router.push("/login");
+        }, 1500);
       } catch (err) {
-        console.error("❌ Register error:", err.response?.data || err);
-        this.error = err.response?.data?.message || "Registration failed!";
+        console.error("Registration error:", err);
+        if (err.response && err.response.data.errors) {
+          const firstError = Object.values(err.response.data.errors)[0][0];
+          this.error = firstError;
+        } else {
+          this.error = "Something went wrong! Please try again.";
+        }
+      } finally {
+        this.loading = false;
       }
     },
   },
 };
 </script>
+
+<style scoped>
+.container {
+  min-height: 80vh;
+}
+</style>

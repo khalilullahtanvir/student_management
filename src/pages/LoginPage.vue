@@ -14,7 +14,9 @@
           <input v-model="form.password" type="password" class="form-control" required />
         </div>
 
-        <button class="btn btn-primary w-100">Login</button>
+        <button class="btn btn-primary w-100" :disabled="loading">
+          {{ loading ? 'Logging in...' : 'Login' }}
+        </button>
       </form>
 
       <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
@@ -23,7 +25,7 @@
 </template>
 
 <script>
-import axios from "@/api";
+import axios from "axios";
 
 export default {
   name: "LoginPage",
@@ -31,30 +33,48 @@ export default {
     return {
       form: { email: "", password: "" },
       error: "",
+      loading: false,
     };
   },
-// LoginPage.vue - এর একটি অংশ
-methods: {
-    async login() {
-        try {
-            const response = await axios.post('http://127.0.0.1:8000/api/login', {
-                email: this.email,
-                password: this.password
-            });
+  methods: {
+    async loginUser() {
+      this.error = "";
+      this.loading = true;
 
-            // সার্ভার থেকে টোকেনটি রিসিভ করুন
-            const token = response.data.token;
+      try {
+        // প্রথমে CSRF কুকি রিফ্রেশ করো
+        await axios.get("http://127.0.0.1:8000/sanctum/csrf-cookie", {
+          withCredentials: true,
+        });
 
-            // টোকেনটি localStorage এ সেভ করে রাখুন
-            localStorage.setItem('auth_token', token);
+        // লগইন রিকোয়েস্ট পাঠাও
+        const response = await axios.post(
+          "http://127.0.0.1:8000/api/login",
+          this.form,
+          { withCredentials: true }
+        );
 
-            // লগইন হয়ে গেলে কোর্স পেজে নিয়ে যান
-            this.$router.push('/courses');
+        // ✅ টোকেন localStorage-এ সেভ করো
+        const token = response.data.token;
+        localStorage.setItem("auth_token", token);
 
-        } catch (error) {
-            console.error('Login failed:', error.response.data);
-        }
-    }
-}
+        // ✅ লগইন সফল হলে redirect
+        this.$router.push("/courses");
+      } catch (error) {
+        console.error("Login failed:", error);
+        this.error =
+          error.response?.data?.message ||
+          "Login failed. Please check your credentials.";
+      } finally {
+        this.loading = false;
+      }
+    },
+  },
 };
 </script>
+
+<style scoped>
+.container {
+  min-height: 80vh;
+}
+</style>

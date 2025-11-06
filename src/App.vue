@@ -2,14 +2,16 @@
   <div id="app">
     <MainNavbar />
     <router-view />
-    <AppFooter />
   </div>
 </template>
 
-<script setup>
-import MainNavbar from './components/MainNavbar.vue'
-import AppFooter from './components/AppFooter.vue'
+<script>
+import MainNavbar from "@/components/MainNavbar.vue";
+export default {
+  components: { MainNavbar },
+};
 </script>
+
 
 <style>
 
